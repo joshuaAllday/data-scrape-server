@@ -34,7 +34,7 @@ func validEmail(email string) bool {
 
 }
 
-func santizeEmail(email string) error {
+func SantizeEmail(email string) error {
 
 	if validEmail(email) {
 		return nil

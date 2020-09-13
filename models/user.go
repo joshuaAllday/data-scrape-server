@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 
 	"golang.org/x/crypto/bcrypt"
@@ -9,7 +10,7 @@ import (
 
 type User struct {
 	Email         string
-	Password      string
+	Password      *string
 	CheckPassword *string
 }
 
@@ -21,12 +22,16 @@ func UserFromJson(data io.Reader) *User {
 }
 
 func (user *User) SanitizeUserRegister() error {
-	err := validatePassword(user.Password, *user.CheckPassword)
+
+	if user.CheckPassword == nil {
+		return errors.New("Passwords don't match")
+	}
+	err := validatePassword(*user.Password, *user.CheckPassword)
 	if err != nil {
 		return err
 	}
 
-	err = santizeEmail(user.Email)
+	err = SantizeEmail(user.Email)
 	if err != nil {
 		return err
 	}
@@ -44,21 +49,22 @@ func HashPassword(password string) string {
 }
 
 func (user *User) SanitizeUserLogin() error {
-	err := santizeEmail(user.Email)
+	err := SantizeEmail(user.Email)
 
 	if err != nil {
 		return err
 	}
 
-	user.Password = HashPassword(user.Password)
-
 	return nil
 }
 
 func CheckHashPasswords(password string, dbPassword string) bool {
-	if password == dbPassword {
-		return true
+
+	encryptionErr := bcrypt.CompareHashAndPassword([]byte(dbPassword), []byte(password))
+
+	if encryptionErr != nil {
+		return false
 	}
 
-	return false
+	return true
 }
