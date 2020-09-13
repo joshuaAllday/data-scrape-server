@@ -10,24 +10,28 @@ import (
 type User struct {
 	Email         string
 	Password      string
-	CheckPassword string
+	CheckPassword *string
 }
 
-func UserFromJson(data io.Reader) (*User, error) {
+func UserFromJson(data io.Reader) *User {
 	var user *User
 	json.NewDecoder(data).Decode(&user)
 
-	err := validatePassword(user.Password, user.CheckPassword)
+	return user
+}
+
+func (user *User) SanitizeUserRegister() error {
+	err := validatePassword(user.Password, *user.CheckPassword)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	err = santizeEmail(user.Email)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return user, nil
+	return nil
 }
 
 func HashPassword(password string) string {
@@ -37,4 +41,24 @@ func HashPassword(password string) string {
 	}
 
 	return string(hash)
+}
+
+func (user *User) SanitizeUserLogin() error {
+	err := santizeEmail(user.Email)
+
+	if err != nil {
+		return err
+	}
+
+	user.Password = HashPassword(user.Password)
+
+	return nil
+}
+
+func CheckHashPasswords(password string, dbPassword string) bool {
+	if password == dbPassword {
+		return true
+	}
+
+	return false
 }

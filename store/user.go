@@ -1,7 +1,10 @@
 package store
 
+import "database/sql"
+
 var (
-	insertUser = `INSERT INTO Users(email, password) VALUES($1, $2)`
+	insertUser   = `INSERT INTO Users(Email, Password) VALUES($1, $2)`
+	getUserLogin = `SELECT Users.ID, Users.Email, Users.Password FROM USERS WHERE Email = $1`
 )
 
 func (db *DB) GetUser() {
@@ -17,4 +20,25 @@ func (db *DB) CreateUser(email string, password string) (*bool, error) {
 	}
 
 	return &valid, nil
+}
+
+type UserDetails struct {
+	ID       string
+	Email    string
+	Password string
+}
+
+func (db *DB) LoginUser(email string) (*UserDetails, error) {
+	row := db.QueryRow(getUserLogin, email)
+	userStruct := new(UserDetails)
+	err := row.Scan(
+		&userStruct.ID,
+		&userStruct.Email,
+		&userStruct.Password,
+	)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, err
+	}
+
+	return userStruct, nil
 }
