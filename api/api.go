@@ -1,7 +1,8 @@
 package api
 
 import (
-	"github.com/data-scrape/data-scrape-server/model"
+	"github.com/data-scrape/data-scrape-server/store"
+	model "github.com/data-scrape/data-scrape-server/store"
 
 	"github.com/gorilla/mux"
 )
@@ -15,7 +16,7 @@ type API struct {
 	dbtse      model.HandlerFunctions
 }
 
-func Init(root *mux.Router, db *model.DB) *mux.Router {
+func Init(root *mux.Router, db *store.DB) *mux.Router {
 
 	api := &API{
 		BaseRoutes: &Routes{},
