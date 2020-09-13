@@ -3,8 +3,9 @@ package store
 import "database/sql"
 
 var (
-	insertUser   = `INSERT INTO Users(Email, Password) VALUES($1, $2)`
-	getUserLogin = `SELECT Users.ID, Users.Email, Users.Password FROM USERS WHERE Email = $1`
+	insertUser           = `INSERT INTO Users(Email, Password) VALUES($1, $2)`
+	getUserLogin         = `SELECT Users.ID, Users.Email, Users.Password FROM USERS WHERE Email = $1`
+	insertUserOauthToken = `UPDATE Users SET Token = $1 WHERE Email = $2`
 )
 
 func (db *DB) GetUser() {
@@ -41,4 +42,15 @@ func (db *DB) LoginUser(email string) (*UserDetails, error) {
 	}
 
 	return userStruct, nil
+}
+
+func (db *DB) AddUserOauthToken(email string, token string) error {
+	stmt, _ := db.Prepare(insertUserOauthToken)
+	_, err := stmt.Exec(email, token)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

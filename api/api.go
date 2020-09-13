@@ -27,6 +27,7 @@ func Init(root *mux.Router, db *store.DB) *mux.Router {
 
 	api.InitUser()
 	api.InitHealth()
+	api.InitOauth()
 
 	return api.BaseRoutes.Router
 }

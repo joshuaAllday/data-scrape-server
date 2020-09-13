@@ -20,6 +20,7 @@ func (api *API) createUser(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(err)
+		return
 	}
 
 	valid, err := api.dbtse.CreateUser(user.Email, models.HashPassword(user.Password))
@@ -28,6 +29,7 @@ func (api *API) createUser(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(err)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -43,6 +45,7 @@ func (api *API) loginUser(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(err)
+		return
 	}
 
 	userDetails, err := api.dbtse.LoginUser(user.Email)
@@ -51,6 +54,7 @@ func (api *API) loginUser(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(err)
+		return
 	}
 
 	valid := models.CheckHashPasswords(user.Password, userDetails.Password)
@@ -59,9 +63,19 @@ func (api *API) loginUser(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode("Invalid Passowrd")
+		return
+	}
+
+	authToken, err := models.CreateJwt(userDetails.ID)
+
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(err)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(userDetails.ID)
+	json.NewEncoder(w).Encode(authToken)
 }
