@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/data-scrape/data-scrape-server/model"
+	_ "github.com/lib/pq"
 )
 
 func SetupDatabase(connectionString string) (*model.DB, error) {

@@ -1,0 +1,11 @@
+BEGIN TRANSACTION;
+
+CREATE TABLE Users (
+    Id serial PRIMARY Key, 
+    Email VARCHAR(100) UNIQUE NOT NULL, 
+    Provider_Id VARCHAR(1000),
+    Token VARCHAR(1000) NOT NULL,
+    Company VARCHAR(100) NOT NULL
+);
+
+COMMIT;

@@ -1,0 +1,29 @@
+version: '3'
+
+# Define services
+services:
+  postgres:
+    environment: 
+      POSTGRES_USER: defaultUser
+      POSTGRES_PASSWORD: secret123
+      POSTGRES_DB: data-scrape
+      POSTGRES_HOST: postgres
+    build: ./postgres
+    ports:        
+      - "5432:5432"
+
+  # App Service
+  user:
+    env_file:
+      - ./.env
+    # Configuration for building the docker image for the service
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+    environment: 
+      CONNECTION_STRING: postgres://defaultUser:secret123@postgres:5432/data-scrape
+    ports:
+      - "8080:8080" # Forward the exposed port 8080 on the container to port 8080 on the host machine
+    restart: unless-stopped
